@@ -15,7 +15,7 @@ const store = configureStore({
     ingredients: ingredientsReducer,
     orders: ordersReducer,
     user: userReducer,
-    constructor: constructorReducer
+    burgerConstructor: constructorReducer
   },
   devTools: process.env.NODE_ENV !== 'production'
 });

@@ -22,7 +22,7 @@ export const getIngredients = createAsyncThunk(
       const data = await getIngredientsApi();
       return data;
     } catch {
-      return mockIngredients;
+      return mockIngredients as unknown as TIngredient[];
     }
   }
 );
@@ -37,9 +37,9 @@ const ingredientsSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(getIngredients.rejected, (state, action) => {
+      .addCase(getIngredients.rejected, (state) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to load ingredients';
+        state.ingredients = mockIngredients;
       })
       .addCase(getIngredients.fulfilled, (state, action) => {
         state.isLoading = false;

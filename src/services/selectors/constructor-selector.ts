@@ -3,9 +3,8 @@ import { ConstructorState } from '../slices/constructor-slice';
 
 export const selectConstructorBun = (
   state: RootState
-): ConstructorState['bun'] => (state.constructor as ConstructorState).bun;
+): ConstructorState['bun'] => state.burgerConstructor.bun;
 
 export const selectConstructorIngredients = (
   state: RootState
-): ConstructorState['ingredients'] =>
-  (state.constructor as ConstructorState).ingredients;
+): ConstructorState['ingredients'] => state.burgerConstructor.ingredients;

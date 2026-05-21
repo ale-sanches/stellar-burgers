@@ -6,13 +6,13 @@ export type ConstructorState = {
   ingredients: TConstructorIngredient[];
 };
 
-export const initialState: ConstructorState = {
+const initialState: ConstructorState = {
   bun: null,
   ingredients: []
 };
 
 const constructorSlice = createSlice({
-  name: 'constructor',
+  name: 'burgerConstructor',
   initialState,
   reducers: {
     setBun: (state, action: PayloadAction<TIngredient>) => {
@@ -21,7 +21,8 @@ const constructorSlice = createSlice({
     addIngredient: (state, action: PayloadAction<TIngredient>) => {
       const uniqueId =
         Date.now().toString(36) + Math.random().toString(36).substring(2);
-      state.ingredients.push({ ...action.payload, id: uniqueId });
+      const newIngredient = { ...action.payload, id: uniqueId };
+      state.ingredients = [...state.ingredients, newIngredient];
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       state.ingredients = state.ingredients.filter(
@@ -54,3 +55,4 @@ export const {
 } = constructorSlice.actions;
 
 export default constructorSlice.reducer;
+export { initialState };
