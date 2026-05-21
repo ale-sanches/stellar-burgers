@@ -1,14 +1,24 @@
 import { useState, useRef, useEffect, FC } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
-
-import { TTabMode } from '@utils-types';
+import { useDispatch, useSelector } from '../../services/store';
+import { getIngredients } from '../../services/slices/ingredients-slice';
+import { setBun, addIngredient } from '../../services/slices/constructor-slice';
+import {
+  selectBuns,
+  selectMains,
+  selectSauces
+} from '../../services/selectors/ingredients-selector';
+import { TIngredient, TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '../ui/burger-ingredients';
 
 export const BurgerIngredients: FC = () => {
-  /** TODO: взять переменные из стора */
-  const buns = [];
-  const mains = [];
-  const sauces = [];
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const buns = useSelector(selectBuns);
+  const mains = useSelector(selectMains);
+  const sauces = useSelector(selectSauces);
 
   const [currentTab, setCurrentTab] = useState<TTabMode>('bun');
   const titleBunRef = useRef<HTMLHeadingElement>(null);
@@ -26,6 +36,10 @@ export const BurgerIngredients: FC = () => {
   const [saucesRef, inViewSauces] = useInView({
     threshold: 0
   });
+
+  useEffect(() => {
+    dispatch(getIngredients());
+  }, [dispatch]);
 
   useEffect(() => {
     if (inViewBuns) {
@@ -47,7 +61,17 @@ export const BurgerIngredients: FC = () => {
       titleSaucesRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  return null;
+  const onIngredientClick = (ingredient: TIngredient) => {
+    navigate(`/ingredients/${ingredient._id}`);
+  };
+
+  const onAddIngredient = (ingredient: TIngredient) => {
+    if (ingredient.type === 'bun') {
+      dispatch(setBun(ingredient));
+    } else {
+      dispatch(addIngredient(ingredient));
+    }
+  };
 
   return (
     <BurgerIngredientsUI
@@ -62,6 +86,8 @@ export const BurgerIngredients: FC = () => {
       mainsRef={mainsRef}
       saucesRef={saucesRef}
       onTabClick={onTabClick}
+      onIngredientClick={onIngredientClick}
+      onAddIngredient={onAddIngredient}
     />
   );
 };

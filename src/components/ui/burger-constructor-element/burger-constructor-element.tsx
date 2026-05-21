@@ -12,23 +12,34 @@ export const BurgerConstructorElementUI: FC<BurgerConstructorElementUIProps> =
       totalItems,
       handleMoveUp,
       handleMoveDown,
-      handleClose
-    }) => (
-      <li className={`${styles.element} mb-4 mr-2`}>
-        <MoveButton
-          handleMoveDown={handleMoveDown}
-          handleMoveUp={handleMoveUp}
-          isUpDisabled={index === 0}
-          isDownDisabled={index === totalItems - 1}
-        />
-        <div className={`${styles.element_fullwidth} ml-2`}>
-          <ConstructorElement
-            text={ingredient.name}
-            price={ingredient.price}
-            thumbnail={ingredient.image}
-            handleClose={handleClose}
+      handleClose,
+      onDelete
+    }) => {
+      const handleCloseClick = () => {
+        if (onDelete) {
+          onDelete(ingredient.id);
+        } else if (handleClose) {
+          handleClose();
+        }
+      };
+
+      return (
+        <li className={`${styles.element} mb-4 mr-2`}>
+          <MoveButton
+            handleMoveDown={handleMoveDown}
+            handleMoveUp={handleMoveUp}
+            isUpDisabled={index === 0}
+            isDownDisabled={index === totalItems - 1}
           />
-        </div>
-      </li>
-    )
+          <div className={`${styles.element_fullwidth} ml-2`}>
+            <ConstructorElement
+              text={ingredient.name}
+              price={ingredient.price}
+              thumbnail={ingredient.image}
+              handleClose={handleCloseClick}
+            />
+          </div>
+        </li>
+      );
+    }
   );
