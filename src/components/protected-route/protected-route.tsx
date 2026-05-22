@@ -1,7 +1,10 @@
 import { FC, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSelector } from '../../services/store';
-import { selectIsAuthChecked } from '../../services/selectors/user-selector';
+import {
+  selectIsAuthChecked,
+  selectIsAuthenticated
+} from '../../services/selectors/user-selector';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -14,12 +17,11 @@ export const ProtectedRoute: FC<ProtectedRouteProps> = ({
 }) => {
   const location = useLocation();
   const isAuthChecked = useSelector(selectIsAuthChecked);
+  const isAuthenticated = useSelector(selectIsAuthenticated);
 
   if (!isAuthChecked) {
     return null;
   }
-
-  const isAuthenticated = !!localStorage.getItem('accessToken');
 
   if (anonymous) {
     return isAuthenticated ? <Navigate to='/' replace /> : <>{children}</>;

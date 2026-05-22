@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { TOrder, TOrdersData } from '@utils-types';
-import { TNewOrderResponse } from '@api';
+import { TNewOrderResponse, TNewOrder } from '@api';
 import {
   getFeedsApi,
   getOrdersApi,
@@ -11,15 +11,17 @@ import {
 interface OrdersState {
   orders: TOrder[];
   isLoading: boolean;
+  isOrderCreating: boolean;
   error: string | null;
   total: number;
   totalToday: number;
-  currentOrder: TNewOrderResponse | null;
+  currentOrder: TNewOrder | null;
 }
 
 const initialState: OrdersState = {
   orders: [],
   isLoading: false,
+  isOrderCreating: false,
   error: null,
   total: 0,
   totalToday: 0,
@@ -58,7 +60,11 @@ export const createOrder = createAsyncThunk(
 const ordersSlice = createSlice({
   name: 'orders',
   initialState,
-  reducers: {},
+  reducers: {
+    clearCurrentOrder: (state) => {
+      state.currentOrder = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getFeeds.pending, (state) => {
@@ -107,18 +113,20 @@ const ordersSlice = createSlice({
         }
       })
       .addCase(createOrder.pending, (state) => {
-        state.isLoading = true;
+        state.isOrderCreating = true;
         state.error = null;
       })
       .addCase(createOrder.rejected, (state, action) => {
-        state.isLoading = false;
+        state.isOrderCreating = false;
         state.error = action.error.message || 'Failed to create order';
       })
       .addCase(createOrder.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.currentOrder = action.payload;
+        state.isOrderCreating = false;
+        state.currentOrder = action.payload.order;
       });
   }
 });
+
+export const { clearCurrentOrder } = ordersSlice.actions;
 
 export default ordersSlice.reducer;

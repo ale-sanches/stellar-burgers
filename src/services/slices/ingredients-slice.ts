@@ -37,9 +37,9 @@ const ingredientsSlice = createSlice({
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(getIngredients.rejected, (state) => {
+      .addCase(getIngredients.rejected, (state, action) => {
         state.isLoading = false;
-        state.ingredients = mockIngredients;
+        state.error = action.error.message || 'Failed to load ingredients';
       })
       .addCase(getIngredients.fulfilled, (state, action) => {
         state.isLoading = false;

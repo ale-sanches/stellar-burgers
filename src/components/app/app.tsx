@@ -1,4 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate
+} from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { useEffect } from 'react';
 import {
@@ -15,91 +21,158 @@ import {
 } from '@pages';
 import { AppHeader } from '@components';
 import { ProtectedRoute } from '@components/protected-route';
-import store from '../../services/store';
-import { getUser } from '../../services/slices/user-slice';
+import { Modal } from '@components/modal';
+import { OrderInfo } from '@components/order-info';
+import { IngredientDetails } from '@components/ingredient-details';
+import { getCookie } from '../../utils/cookie';
+import store, { AppDispatch } from '../../services/store';
+import { getUser, setAuthChecked } from '../../services/slices/user-slice';
 import '../../index.css';
 import styles from './app.module.css';
 
-const AppContent = () => {
-  const dispatch = store.dispatch as any;
+const AppRoutes = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      dispatch(getUser());
+  const handleModalClose = () => {
+    const locationState = location.state as { background?: Location };
+    const background = locationState?.background;
+    if (background) {
+      navigate(background.pathname + background.search, { replace: true });
     } else {
-      dispatch({ type: 'user/setAuthChecked', payload: true });
+      navigate(-1);
     }
-  }, []);
+  };
+
+  const locationState = location.state as { background?: Location };
+  const background = locationState?.background;
 
   return (
-    <BrowserRouter>
-      <div className={styles.app}>
-        <AppHeader />
+    <div className={styles.app}>
+      <AppHeader />
+      <Routes location={background || location}>
+        <Route path='/' element={<ConstructorPage />} />
+        <Route path='/feed' element={<Feed />} />
+        <Route
+          path='/feed/:number'
+          element={
+            <div className={styles.detailPageWrap}>
+              <p
+                className={`text text_type_digits-default ${styles.detailHeader}`}
+              >
+                #
+              </p>
+              <Feed />
+            </div>
+          }
+        />
+        <Route path='/ingredients/:id' element={<Ingredients />} />
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute anonymous>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute anonymous>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute anonymous>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute anonymous>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route path='*' element={<NotFound404 />} />
+      </Routes>
+
+      {background && (
         <Routes>
-          <Route path='/' element={<ConstructorPage />} />
-          <Route path='/feed' element={<Feed />} />
-          <Route path='/feed/:number' element={<Feed />} />
-          <Route path='/ingredients/:id' element={<Ingredients />} />
           <Route
-            path='/login'
+            path='/ingredients/:id'
             element={
-              <ProtectedRoute anonymous>
-                <Login />
-              </ProtectedRoute>
+              <Modal onClose={handleModalClose} title='Детали ингредиента'>
+                <IngredientDetails />
+              </Modal>
             }
           />
           <Route
-            path='/register'
+            path='/feed/:number'
             element={
-              <ProtectedRoute anonymous>
-                <Register />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/forgot-password'
-            element={
-              <ProtectedRoute anonymous>
-                <ForgotPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/reset-password'
-            element={
-              <ProtectedRoute anonymous>
-                <ResetPassword />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile'
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path='/profile/orders'
-            element={
-              <ProtectedRoute>
-                <ProfileOrders />
-              </ProtectedRoute>
+              <Modal onClose={handleModalClose} title=''>
+                <OrderInfo />
+              </Modal>
             }
           />
           <Route
             path='/profile/orders/:number'
             element={
-              <ProtectedRoute>
-                <ProfileOrders />
-              </ProtectedRoute>
+              <Modal onClose={handleModalClose} title=''>
+                <OrderInfo />
+              </Modal>
             }
           />
-          <Route path='*' element={<NotFound404 />} />
         </Routes>
-      </div>
+      )}
+    </div>
+  );
+};
+
+const AppContent = () => {
+  const dispatch: AppDispatch = store.dispatch;
+
+  useEffect(() => {
+    const token = getCookie('accessToken');
+    if (token) {
+      dispatch(getUser());
+    } else {
+      dispatch(setAuthChecked(true));
+    }
+  }, [dispatch]);
+
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   );
 };

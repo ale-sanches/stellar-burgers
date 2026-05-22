@@ -103,6 +103,7 @@ const userSlice = createSlice({
         state.isLoading = false;
         state.error = action.error.message || 'Failed to get user';
         state.isAuthChecked = true;
+        localStorage.removeItem('refreshToken');
       })
       .addCase(getUser.fulfilled, (state, action) => {
         state.isLoading = false;

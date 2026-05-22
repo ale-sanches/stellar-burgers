@@ -36,7 +36,8 @@ export const Profile: FC = () => {
     dispatch(
       updateUser({
         name: formValue.name,
-        email: formValue.email
+        email: formValue.email,
+        password: formValue.password || undefined
       } as TRegisterData)
     );
     setFormValue((prev) => ({ ...prev, password: '' }));

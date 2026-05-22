@@ -26,7 +26,10 @@
       "@api": ["src/utils/burger-api.ts"],
       "@slices": ["src/services/slices"],
       "@selectors": ["src/services/selectors"],
-      "@components/protected-route": ["src/components/protected-route"]
+      "@components/protected-route": ["src/components/protected-route"],
+      "@components/modal": ["src/components/modal"],
+      "@components/order-info": ["src/components/order-info"],
+      "@components/ingredient-details": ["src/components/ingredient-details"]
     }
   },
   "include": ["src"]

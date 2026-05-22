@@ -22,10 +22,6 @@ export const OrderInfo: FC = () => {
     }
   }, [dispatch, number, orderData]);
 
-  if (!orderData) {
-    return <Preloader />;
-  }
-
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
     if (!orderData || !ingredients.length) return null;
@@ -68,7 +64,7 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
+  if (!orderData || !orderInfo) {
     return <Preloader />;
   }
 

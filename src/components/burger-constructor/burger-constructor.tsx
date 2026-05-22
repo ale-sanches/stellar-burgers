@@ -1,8 +1,7 @@
-import { FC, useMemo } from 'react';
+import { FC, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from '../../services/store';
-import { TConstructorIngredient, TIngredient } from '@utils-types';
-import { TNewOrderResponse } from '@api';
+import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
 import {
   selectConstructorBun,
@@ -10,7 +9,7 @@ import {
 } from '../../services/selectors/constructor-selector';
 import { selectUser } from '../../services/selectors/user-selector';
 import {
-  selectOrdersLoading,
+  selectOrderCreating,
   selectCurrentOrder
 } from '../../services/selectors/orders-selector';
 import {
@@ -18,7 +17,10 @@ import {
   setBun,
   clearConstructor
 } from '../../services/slices/constructor-slice';
-import { createOrder } from '../../services/slices/orders-slice';
+import {
+  createOrder,
+  clearCurrentOrder
+} from '../../services/slices/orders-slice';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
@@ -27,10 +29,14 @@ export const BurgerConstructor: FC = () => {
   const bun = useSelector(selectConstructorBun) ?? null;
   const ingredients = useSelector(selectConstructorIngredients) ?? [];
   const user = useSelector(selectUser);
-  const orderRequest = useSelector(selectOrdersLoading);
-  const orderModalData = useSelector(selectCurrentOrder) as
-    | TNewOrderResponse['order']
-    | null;
+  const orderRequest = useSelector(selectOrderCreating);
+  const orderModalData = useSelector(selectCurrentOrder) as TOrder | null;
+
+  useEffect(() => {
+    if (orderModalData) {
+      dispatch(clearConstructor());
+    }
+  }, [orderModalData, dispatch]);
 
   const constructorItems = {
     bun: bun,
@@ -52,7 +58,7 @@ export const BurgerConstructor: FC = () => {
   };
 
   const closeOrderModal = () => {
-    dispatch(clearConstructor());
+    dispatch(clearCurrentOrder());
   };
 
   const handleAddIngredient = (ingredient: TIngredient) => {
