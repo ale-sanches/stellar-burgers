@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { TIngredient } from '@utils-types';
 import { getIngredientsApi } from '@api';
-import { mockIngredients } from '../../utils/mock-data';
 
 interface IngredientsState {
   ingredients: TIngredient[];
@@ -18,12 +17,8 @@ const initialState: IngredientsState = {
 export const getIngredients = createAsyncThunk(
   'ingredients/getIngredients',
   async () => {
-    try {
-      const data = await getIngredientsApi();
-      return data;
-    } catch {
-      return mockIngredients as unknown as TIngredient[];
-    }
+    const data = await getIngredientsApi();
+    return data;
   }
 );
 
