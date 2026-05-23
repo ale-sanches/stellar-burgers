@@ -63,7 +63,7 @@ const AppRoutes = () => {
               >
                 #
               </p>
-              <Feed />
+              <OrderInfo />
             </div>
           }
         />
@@ -120,7 +120,14 @@ const AppRoutes = () => {
           path='/profile/orders/:number'
           element={
             <ProtectedRoute>
-              <ProfileOrders />
+              <div className={styles.detailPageWrap}>
+                <p
+                  className={`text text_type_digits-default ${styles.detailHeader}`}
+                >
+                  #
+                </p>
+                <OrderInfo />
+              </div>
             </ProtectedRoute>
           }
         />
