@@ -27,6 +27,7 @@ import { IngredientDetails } from '@components/ingredient-details';
 import { getCookie } from '../../utils/cookie';
 import store, { AppDispatch } from '../../services/store';
 import { getUser, setAuthChecked } from '../../services/slices/user-slice';
+import { getIngredients } from '../../services/slices/ingredients-slice';
 import '../../index.css';
 import styles from './app.module.css';
 
@@ -168,6 +169,7 @@ const AppContent = () => {
     } else {
       dispatch(setAuthChecked(true));
     }
+    dispatch(getIngredients());
   }, [dispatch]);
 
   return (

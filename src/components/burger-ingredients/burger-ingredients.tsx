@@ -2,7 +2,6 @@ import { useState, useRef, useEffect, FC } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
 import { useDispatch, useSelector } from '../../services/store';
-import { getIngredients } from '../../services/slices/ingredients-slice';
 import { setBun, addIngredient } from '../../services/slices/constructor-slice';
 import {
   selectBuns,
@@ -36,10 +35,6 @@ export const BurgerIngredients: FC = () => {
   const [saucesRef, inViewSauces] = useInView({
     threshold: 0
   });
-
-  useEffect(() => {
-    dispatch(getIngredients());
-  }, [dispatch]);
 
   useEffect(() => {
     if (inViewBuns) {
