@@ -11,8 +11,14 @@ import {
 import { TBurgerIngredientUIProps } from './type';
 
 export const BurgerIngredientUI: FC<TBurgerIngredientUIProps> = memo(
-  ({ ingredient, count, handleAdd, locationState }) => {
+  ({ ingredient, count, handleAdd, locationState, onClick }) => {
     const { image, price, name, _id } = ingredient;
+
+    const handleCardClick = () => {
+      if (onClick) {
+        onClick(ingredient);
+      }
+    };
 
     return (
       <li className={styles.container}>

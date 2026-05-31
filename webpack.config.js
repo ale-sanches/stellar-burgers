@@ -2,6 +2,9 @@ const path = require('path');
 const ESLintPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const Dotenv = require('dotenv-webpack');
+const webpack = require('webpack');
+
+require('dotenv').config();
 
 module.exports = {
   entry: path.resolve(__dirname, './src/index.tsx'),
@@ -54,7 +57,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html'
     }),
-    new Dotenv()
+    new Dotenv(),
+    new webpack.DefinePlugin({
+      'process.env.BURGER_API_URL': JSON.stringify(process.env.BURGER_API_URL)
+    })
   ],
   resolve: {
     extensions: [
@@ -90,6 +96,16 @@ module.exports = {
     compress: true,
     historyApiFallback: true,
     port: 4000,
-    open: true
+    open: true,
+    proxy: {
+      '/api': {
+        target: 'https://norma.nomoreparties.space',
+        secure: true,
+        changeOrigin: true,
+        ssl: {
+          rejectUnauthorized: false
+        }
+      }
+    }
   }
 };
