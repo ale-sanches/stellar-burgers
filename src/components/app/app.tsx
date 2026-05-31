@@ -136,14 +136,7 @@ const AppRoutes = () => {
 
       {background && (
         <Routes>
-          <Route
-            path='/ingredients/:id'
-            element={
-              <Modal onClose={handleModalClose} title='Детали ингредиента'>
-                <IngredientDetails />
-              </Modal>
-            }
-          />
+          <Route path='/ingredients/:id' element={<IngredientDetails />} />
           <Route
             path='/feed/:number'
             element={
