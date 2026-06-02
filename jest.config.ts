@@ -214,7 +214,7 @@ import type { JestConfigWithTsJest } from 'ts-jest';
 const config: JestConfigWithTsJest = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  collectCoverage: false,
+  collectCoverage: true,
   moduleNameMapper: {
     '^@pages(.*)$': '<rootDir>/src/pages$1',
     '^@components(.*)$': '<rootDir>/src/components$1',
