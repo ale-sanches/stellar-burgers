@@ -1,20 +1,14 @@
 import { test, expect } from '@playwright/test';
-import ingredients from './fixtures/ingredients.json';
-import user from './fixtures/user.json';
 import order from './fixtures/order.json';
 
 const MOCK_ACCESS_TOKEN = 'mock_access_token';
 const MOCK_REFRESH_TOKEN = 'mock_refresh_token';
 
-test.describe('Создание заказа', () => {
+test.describe('Создание заказа с HAR', () => {
   test.beforeEach(async ({ page }) => {
-    // Перехватываем запрос ингредиентов
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: ingredients })
-      });
+    // Используем HAR для перехвата запроса ингредиентов (без update - только чтение)
+    await page.routeFromHAR('tests/hars/ingredients.har', {
+      url: 'https://norma.nomoreparties.space/api/ingredients'
     });
 
     // Перехватываем запрос данных пользователя
@@ -22,7 +16,10 @@ test.describe('Создание заказа', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify(user)
+        body: JSON.stringify({
+          success: true,
+          user: { email: 'test@test.ru', name: 'Test User' }
+        })
       });
     });
 
@@ -38,11 +35,9 @@ test.describe('Создание заказа', () => {
       }
     });
 
-    // Устанавливаем моковые токены в cookie и localStorage
+    // Устанавливаем моковые токены в cookie и localStorage перед тестом
     await page.addInitScript((tokens) => {
-      // Устанавливаем accessToken в cookie
       document.cookie = `accessToken=${tokens.accessToken}; path=/`;
-      // Устанавливаем refreshToken в localStorage
       localStorage.setItem('refreshToken', tokens.refreshToken);
     }, { accessToken: MOCK_ACCESS_TOKEN, refreshToken: MOCK_REFRESH_TOKEN });
 

@@ -3,8 +3,45 @@ import ingredientsReducer from '../src/services/slices/ingredients-slice';
 import ordersReducer from '../src/services/slices/orders-slice';
 import userReducer from '../src/services/slices/user-slice';
 import constructorReducer from '../src/services/slices/constructor-slice';
+import { combineReducers } from '@reduxjs/toolkit';
 
 describe('Инициализация rootReducer', () => {
+  it('вызов rootReducer с undefined состоянием и неизвестным экшеном возвращает корректное начальное состояние', () => {
+    const rootReducer = combineReducers({
+      ingredients: ingredientsReducer,
+      orders: ordersReducer,
+      user: userReducer,
+      burgerConstructor: constructorReducer
+    });
+    const initialState = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
+
+    // Проверяем начальное состояние всех редюсеров
+    expect(initialState.ingredients).toEqual({
+      ingredients: [],
+      isLoading: false,
+      error: null
+    });
+    expect(initialState.orders).toEqual({
+      orders: [],
+      isLoading: false,
+      isOrderCreating: false,
+      error: null,
+      total: 0,
+      totalToday: 0,
+      currentOrder: null
+    });
+    expect(initialState.user).toEqual({
+      user: null,
+      isLoading: false,
+      error: null,
+      isAuthChecked: false
+    });
+    expect(initialState.burgerConstructor).toEqual({
+      bun: null,
+      ingredients: []
+    });
+  });
+
   it('должен инициализировать все редюсеры корректно', () => {
     const state = store.getState();
 
