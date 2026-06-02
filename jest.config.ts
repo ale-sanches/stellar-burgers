@@ -213,10 +213,22 @@ import type { JestConfigWithTsJest } from 'ts-jest';
 
 const config: JestConfigWithTsJest = {
   preset: 'ts-jest',
-  testEnvironment: 'node',
-  collectCoverage: true,
-  coverageDirectory: 'coverage',
-  coverageProvider: 'v8'
+  testEnvironment: 'jsdom',
+  collectCoverage: false,
+  moduleNameMapper: {
+    '^@pages(.*)$': '<rootDir>/src/pages$1',
+    '^@components(.*)$': '<rootDir>/src/components$1',
+    '^@ui(.*)$': '<rootDir>/src/components/ui$1',
+    '^@ui-pages(.*)$': '<rootDir>/src/components/ui/pages$1',
+    '^@utils-types$': '<rootDir>/src/utils/types',
+    '^@api$': '<rootDir>/src/utils/burger-api.ts',
+    '^@slices(.*)$': '<rootDir>/src/services/slices$1',
+    '^@selectors(.*)$': '<rootDir>/src/services/selectors$1',
+    '^@components/protected-route$': '<rootDir>/src/components/protected-route',
+    '^@components/modal$': '<rootDir>/src/components/modal',
+    '^@components/order-info$': '<rootDir>/src/components/order-info',
+    '^@components/ingredient-details$': '<rootDir>/src/components/ingredient-details'
+  }
 };
 
 export default config;
