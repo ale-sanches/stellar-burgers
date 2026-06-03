@@ -215,6 +215,7 @@ const config: JestConfigWithTsJest = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   collectCoverage: true,
+  testMatch: ['**/tests/**/*.test.ts'],
   moduleNameMapper: {
     '^@pages(.*)$': '<rootDir>/src/pages$1',
     '^@components(.*)$': '<rootDir>/src/components$1',
@@ -227,7 +228,8 @@ const config: JestConfigWithTsJest = {
     '^@components/protected-route$': '<rootDir>/src/components/protected-route',
     '^@components/modal$': '<rootDir>/src/components/modal',
     '^@components/order-info$': '<rootDir>/src/components/order-info',
-    '^@components/ingredient-details$': '<rootDir>/src/components/ingredient-details'
+    '^@components/ingredient-details$':
+      '<rootDir>/src/components/ingredient-details'
   }
 };
 
