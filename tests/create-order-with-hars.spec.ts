@@ -57,7 +57,7 @@ test.describe('Создание заказа с HAR', () => {
     await page.getByRole('button', { name: /Добавить/i }).first().click();
 
     // Ожидаем появления булки в конструкторе
-    await expect(page.locator('section').filter({ hasText: /(верх|низ)/i })).toBeVisible();
+    await expect(page.getByTestId('constructor-bun-top')).toBeVisible();
 
     // Нажимаем кнопку "Оформить заказ"
     await page.getByRole('button', { name: /Оформить заказ/i }).click();
@@ -72,6 +72,6 @@ test.describe('Создание заказа с HAR', () => {
     await expect(page.getByText(order.order.number.toString())).not.toBeVisible();
 
     // Проверяем, что конструктор пуст (нет булки)
-    await expect(page.locator('section').filter({ hasText: /Выберите булки/ })).toBeVisible();
+    await expect(page.getByTestId('constructor-bun-top')).toContainText('Выберите булки');
   });
 });

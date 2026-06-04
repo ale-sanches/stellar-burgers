@@ -1,15 +1,10 @@
 import { test, expect } from '@playwright/test';
-import ingredients from './fixtures/ingredients.json';
 
 test.describe('Конструктор бургера', () => {
   test.beforeEach(async ({ page }) => {
-    // Перехватываем запрос ингредиентов
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: ingredients })
-      });
+    // Используем HAR для перехвата запроса ингредиентов
+    await page.routeFromHAR('tests/hars/ingredients.har', {
+      url: 'https://norma.nomoreparties.space/api/ingredients'
     });
 
     // Перехватываем запрос данных пользователя
@@ -35,19 +30,16 @@ test.describe('Конструктор бургера', () => {
   });
 
   test('должен добавить булку в конструктор при клике', async ({ page }) => {
-    // Нажимаем кнопку "Добавить" для первой булки
-    await page
-      .getByRole('button', { name: /Добавить/i })
-      .first()
-      .click();
+    // Находим булку по имени из HAR
+    const bunIngredientName = 'Краторная булка N-200i';
 
-    // Проверяем, что булка появилась в конструкторе
-    await expect(
-      page.locator('section').filter({ hasText: /верх/i })
-    ).toBeVisible();
-    await expect(
-      page.locator('section').filter({ hasText: /низ/i })
-    ).toBeVisible();
+    // Нажимаем кнопку "Добавить" для конкретной булки
+    await page.locator('section').filter({ hasText: bunIngredientName })
+      .getByRole('button', { name: /Добавить/i }).click();
+
+    // Проверяем, что конкретная булка появилась в конструкторе
+    await expect(page.getByTestId('constructor-bun-top')).toContainText(`${bunIngredientName} (верх)`);
+    await expect(page.getByTestId('constructor-bun-bottom')).toContainText(`${bunIngredientName} (низ)`);
   });
 
   test('должен добавить начинку в конструктор при клике', async ({ page }) => {

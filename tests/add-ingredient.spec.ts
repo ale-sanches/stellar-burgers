@@ -1,9 +1,4 @@
 import { test, expect } from '@playwright/test';
-import ingredients from './fixtures/ingredients.json';
-
-// ID ингредиентов из HAR файла
-const BUN_ID = '643d69a5c3f7b9001cfa093c';
-const MAIN_ID = '643d69a5c3f7b9001cfa0940';
 
 test.describe('Добавление ингредиента в конструктор', () => {
   test.beforeEach(async ({ page }) => {
@@ -15,30 +10,26 @@ test.describe('Добавление ингредиента в конструкт
   });
 
   test('должен добавить начинку в конструктор при клике на кнопку "Добавить"', async ({ page }) => {
-    // Находим первую начинку (main) и кликаем на её кнопку добавления
-    // Используем первый попавшийся ингредиент с типом main
-    const mainIngredient = ingredients.find((i) => i.type === 'main');
-    expect(mainIngredient).toBeDefined();
+    // Находим начинку (main) по имени из HAR
+    const mainIngredientName = 'Мясо бессмертных моллюсков Protostomia';
 
-    // Кликаем на кнопку "Добавить" рядом с ингредиентом
-    await page.getByRole('button', { name: /Добавить/i }).first().click();
+    // Кликаем на кнопку "Добавить" рядом с конкретным ингредиентом в списке ингредиентов
+    await page.locator('section').filter({ hasText: mainIngredientName })
+      .getByRole('button', { name: /Добавить/i }).click();
 
     // Проверяем, что ингредиент появился в конструкторе (в списке начинок)
-    await expect(page.locator('section').filter({ hasText: mainIngredient!.name })).toBeVisible();
+    await expect(page.getByTestId('constructor-ingredients')).toContainText(mainIngredientName);
   });
 
   test('должен добавить булку в конструктор', async ({ page }) => {
-    // Находим булку
-    const bunIngredient = ingredients.find((i) => i.type === 'bun');
-    expect(bunIngredient).toBeDefined();
+    // Находим булку по имени из HAR
+    const bunIngredientName = 'Краторная булка N-200i';
 
-    // Кликаем на кнопку добавления булки
-    await page.getByRole('button', { name: /Добавить/i }).first().click();
+    // Кликаем на кнопку добавления булки в списке ингредиентов
+    await page.locator('section').filter({ hasText: bunIngredientName })
+      .getByRole('button', { name: /Добавить/i }).click();
 
     // Проверяем, что булка отображается в конструкторе (верхняя часть)
-    // После добавления булки она должна появиться в конструкторе с текстом "(верх)"
-    await expect(
-      page.locator('section').filter({ hasText: `${bunIngredient!.name} (верх)` })
-    ).toBeVisible();
+    await expect(page.getByTestId('constructor-bun-top')).toContainText(`${bunIngredientName} (верх)`);
   });
 });
