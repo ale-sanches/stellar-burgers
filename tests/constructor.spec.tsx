@@ -6,18 +6,8 @@ test.describe('Конструктор бургера', () => {
       url: 'https://norma.nomoreparties.space/api/ingredients'
     });
 
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          user: {
-            email: 'test@test.ru',
-            name: 'Test User'
-          }
-        })
-      });
+    await page.routeFromHAR('tests/hars/auth-user.har', {
+      url: 'https://norma.nomoreparties.space/api/auth/user'
     });
 
     await page.goto('http://localhost:3000');

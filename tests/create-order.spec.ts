@@ -1,46 +1,22 @@
 import { test, expect } from '@playwright/test';
-import ingredients from './fixtures/ingredients.json';
-import user from './fixtures/user.json';
-import order from './fixtures/order.json';
 
 const MOCK_ACCESS_TOKEN = 'mock_access_token';
 const MOCK_REFRESH_TOKEN = 'mock_refresh_token';
 
 test.describe('Создание заказа', () => {
   test.beforeEach(async ({ page }) => {
-    // Перехватываем запрос ингредиентов
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: ingredients
-        })
-      });
+    await page.routeFromHAR('tests/hars/ingredients.har', {
+      url: 'https://norma.nomoreparties.space/api/ingredients'
     });
 
-    // Перехватываем запрос пользователя
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify(user)
-      });
+    await page.routeFromHAR('tests/hars/auth-user.har', {
+      url: 'https://norma.nomoreparties.space/api/auth/user'
     });
 
-    // Перехватываем создание заказа
-    await page.route('**/api/orders', async (route) => {
-      if (route.request().method() === 'POST') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(order)
-        });
-      }
+    await page.routeFromHAR('tests/hars/orders.har', {
+      url: 'https://norma.nomoreparties.space/api/orders'
     });
 
-    // Устанавливаем токены до загрузки приложения
     await page.addInitScript(
       ({ accessToken, refreshToken }) => {
         document.cookie = `accessToken=${accessToken}; path=/`;
@@ -72,14 +48,10 @@ test.describe('Создание заказа', () => {
       .click();
 
     // Проверяем, что булка появилась в конструкторе
-    await expect(
-      page.getByTestId('constructor-bun-top')
-    ).toBeVisible();
+    await expect(page.getByTestId('constructor-bun-top')).toBeVisible();
 
     // Оформляем заказ
-    await page
-      .getByRole('button', { name: /Оформить заказ/i })
-      .click();
+    await page.getByRole('button', { name: /Оформить заказ/i }).click();
 
     // Находим модальное окно заказа
     const orderModal = page.getByRole('dialog');
@@ -90,9 +62,7 @@ test.describe('Создание заказа', () => {
     });
 
     // Проверяем номер заказа внутри модалки
-    await expect(orderModal).toContainText(
-      order.order.number.toString()
-    );
+    await expect(orderModal).toContainText('12345');
 
     // Закрываем модалку
     await page.keyboard.press('Escape');
@@ -101,8 +71,8 @@ test.describe('Создание заказа', () => {
     await expect(orderModal).not.toBeVisible();
 
     // Проверяем очистку конструктора после оформления заказа
-    await expect(
-      page.getByTestId('constructor-bun-top')
-    ).toContainText('Выберите булки');
+    await expect(page.getByTestId('constructor-bun-top')).toContainText(
+      'Выберите булки'
+    );
   });
 });

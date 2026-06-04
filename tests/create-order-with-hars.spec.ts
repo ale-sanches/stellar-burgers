@@ -1,38 +1,26 @@
 import { test, expect } from '@playwright/test';
-import order from './fixtures/order.json';
 
 const MOCK_ACCESS_TOKEN = 'mock_access_token';
 const MOCK_REFRESH_TOKEN = 'mock_refresh_token';
 
 test.describe('Создание заказа с HAR', () => {
   test.beforeEach(async ({ page }) => {
-    // Используем HAR для перехвата запроса ингредиентов (без update - только чтение)
+    // Используем HAR для перехвата запроса ингредиентов
     await page.routeFromHAR('tests/hars/ingredients.har', {
-      url: 'https://norma.nomoreparties.space/api/ingredients'
+      url: 'https://norma.nomoreparties.space/api/ingredients',
+      notFound: 'abort'
     });
 
-    // Перехватываем запрос данных пользователя
-    await page.route('**/api/auth/user', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          user: { email: 'test@test.ru', name: 'Test User' }
-        })
-      });
+    // Используем HAR для перехвата запроса данных пользователя
+    await page.routeFromHAR('tests/hars/auth-user.har', {
+      url: 'https://norma.nomoreparties.space/api/auth/user',
+      notFound: 'abort'
     });
 
-    // Перехватываем запрос создания заказа
-    await page.route('**/api/orders', async (route) => {
-      const request = route.request();
-      if (request.method() === 'POST') {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(order)
-        });
-      }
+    // Используем HAR для перехвата запроса создания заказа
+    await page.routeFromHAR('tests/hars/orders.har', {
+      url: 'https://norma.nomoreparties.space/api/orders',
+      notFound: 'abort'
     });
 
     // Устанавливаем моковые токены в cookie и localStorage перед тестом
@@ -53,6 +41,8 @@ test.describe('Создание заказа с HAR', () => {
   });
 
   test('должен создать заказ с ингредиентами', async ({ page }) => {
+    const orderNumber = 12345;
+
     // Добавляем булку
     await page.getByRole('button', { name: /Добавить/i }).first().click();
 
@@ -63,13 +53,13 @@ test.describe('Создание заказа с HAR', () => {
     await page.getByRole('button', { name: /Оформить заказ/i }).click();
 
     // Проверяем, что модальное окно открылось и номер заказа верный
-    await expect(page.getByText(order.order.number.toString())).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(orderNumber.toString())).toBeVisible({ timeout: 10000 });
 
     // Закрываем модальное окно нажатием Escape
     await page.keyboard.press('Escape');
 
     // Проверяем, что модальное окно закрылось
-    await expect(page.getByText(order.order.number.toString())).not.toBeVisible();
+    await expect(page.getByText(orderNumber.toString())).not.toBeVisible();
 
     // Проверяем, что конструктор пуст (нет булки)
     await expect(page.getByTestId('constructor-bun-top')).toContainText('Выберите булки');
