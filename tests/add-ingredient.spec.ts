@@ -1,15 +1,14 @@
 import { test, expect } from '@playwright/test';
 import ingredients from './fixtures/ingredients.json';
 
+// ID ингредиентов из HAR файла
+const BUN_ID = '643d69a5c3f7b9001cfa093c';
+const MAIN_ID = '643d69a5c3f7b9001cfa0940';
+
 test.describe('Добавление ингредиента в конструктор', () => {
   test.beforeEach(async ({ page }) => {
-    // Перехватываем запрос ингредиентов
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: ingredients })
-      });
+    await page.routeFromHAR('tests/hars/ingredients.har', {
+      url: 'https://norma.nomoreparties.space/api/ingredients'
     });
 
     await page.goto('http://localhost:3000');

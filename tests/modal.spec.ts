@@ -1,26 +1,20 @@
 import { test, expect } from '@playwright/test';
-import ingredients from './fixtures/ingredients.json';
 
 test.describe('Модальные окна ингредиентов', () => {
   test.beforeEach(async ({ page }) => {
-    // Перехватываем запрос ингредиентов
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: ingredients })
-      });
+    await page.routeFromHAR('tests/hars/ingredients.har', {
+      url: 'https://norma.nomoreparties.space/api/ingredients'
     });
 
     await page.goto('http://localhost:3000');
   });
 
   test('должен открыть модальное окно ингредиента при клике на ингредиент', async ({ page }) => {
-    // Находим id первого ингредиента
-    const ingredient = ingredients[0];
+    const ingredientId = '643d69a5c3f7b9001cfa093c';
+    const ingredientName = 'Краторная булка N-200i';
 
     // Переходим на страницу ингредиента с state для модального окна
-    await page.goto(`http://localhost:3000/ingredients/${ingredient._id}`, {
+    await page.goto(`http://localhost:3000/ingredients/${ingredientId}`, {
       waitUntil: 'networkidle'
     });
 
@@ -28,14 +22,14 @@ test.describe('Модальные окна ингредиентов', () => {
     await expect(page.getByRole('heading', { name: 'Детали ингредиента' })).toBeVisible();
 
     // Проверяем, что название ингредиента отображается в модальном окне
-    await expect(page.getByText(ingredient.name)).toBeVisible();
+    await expect(page.getByText(ingredientName)).toBeVisible();
   });
 
   test('должен закрыть модальное окно по клику на крестик', async ({ page }) => {
-    const ingredient = ingredients[0];
+    const ingredientId = '643d69a5c3f7b9001cfa093c';
 
     // Открываем модальное окно
-    await page.goto(`http://localhost:3000/ingredients/${ingredient._id}`, {
+    await page.goto(`http://localhost:3000/ingredients/${ingredientId}`, {
       waitUntil: 'networkidle'
     });
 
@@ -51,10 +45,10 @@ test.describe('Модальные окна ингредиентов', () => {
   });
 
   test('должен закрыть модальное окно по клику на оверлей', async ({ page }) => {
-    const ingredient = ingredients[0];
+    const ingredientId = '643d69a5c3f7b9001cfa093c';
 
     // Открываем модальное окно
-    await page.goto(`http://localhost:3000/ingredients/${ingredient._id}`, {
+    await page.goto(`http://localhost:3000/ingredients/${ingredientId}`, {
       waitUntil: 'networkidle'
     });
 
