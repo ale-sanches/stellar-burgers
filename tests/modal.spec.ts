@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Модальные окна ингредиентов', () => {
+  const ingredientName = 'Краторная булка N-200i';
+
   test.beforeEach(async ({ page }) => {
     await page.routeFromHAR('tests/hars/ingredients.har', {
       url: 'https://norma.nomoreparties.space/api/ingredients'
@@ -9,58 +11,72 @@ test.describe('Модальные окна ингредиентов', () => {
     await page.goto('http://localhost:3000');
   });
 
-  test('должен открыть модальное окно ингредиента при клике на ингредиент', async ({ page }) => {
-    const ingredientId = '643d69a5c3f7b9001cfa093c';
-    const ingredientName = 'Краторная булка N-200i';
+  test('должен открыть модальное окно ингредиента при клике на ингредиент', async ({
+    page
+  }) => {
+    // Кликаем по ингредиенту в интерфейсе
+    await page.getByText(ingredientName).first().click();
 
-    // Переходим на страницу ингредиента с state для модального окна
-    await page.goto(`http://localhost:3000/ingredients/${ingredientId}`, {
-      waitUntil: 'networkidle'
+    // Проверяем открытие модального окна
+    const modalTitle = page.getByRole('heading', {
+      name: 'Детали ингредиента'
     });
 
-    // Проверяем, что модальное окно открылось с заголовком
-    await expect(page.getByRole('heading', { name: 'Детали ингредиента' })).toBeVisible();
+    await expect(modalTitle).toBeVisible();
 
-    // Проверяем, что название ингредиента отображается в модальном окне
+    // Проверяем, что отображается выбранный ингредиент
     await expect(page.getByText(ingredientName)).toBeVisible();
+
+    // Проверяем изменение URL
+    await expect(page).toHaveURL(/\/ingredients\/643d69a5c3f7b9001cfa093c$/);
   });
 
-  test('должен закрыть модальное окно по клику на крестик', async ({ page }) => {
-    const ingredientId = '643d69a5c3f7b9001cfa093c';
+  test('должен закрыть модальное окно по клику на крестик', async ({
+    page
+  }) => {
+    // Открываем модалку через пользовательский сценарий
+    await page.getByText(ingredientName).first().click();
 
-    // Открываем модальное окно
-    await page.goto(`http://localhost:3000/ingredients/${ingredientId}`, {
-      waitUntil: 'networkidle'
+    const modalTitle = page.getByRole('heading', {
+      name: 'Детали ингредиента'
     });
 
-    // Проверяем, что модальное окно открыто
-    await expect(page.getByRole('heading', { name: 'Детали ингредиента' })).toBeVisible();
+    await expect(modalTitle).toBeVisible();
 
-    // Находим кнопку закрытия (по наличию SVG иконки закрытия)
-    const closeButton = page.locator('button').filter({ has: page.locator('svg') });
+    // Находим кнопку закрытия
+    const closeButton = page
+      .locator('button')
+      .filter({ has: page.locator('svg') })
+      .first();
+
     await closeButton.click();
 
-    // Проверяем, что модальное окно закрылось - URL должен измениться
+    // Проверяем закрытие модалки
+    await expect(modalTitle).not.toBeVisible();
+
+    // Проверяем возврат на главную страницу
     await expect(page).toHaveURL('http://localhost:3000/');
   });
 
-  test('должен закрыть модальное окно по клику на оверлей', async ({ page }) => {
-    const ingredientId = '643d69a5c3f7b9001cfa093c';
+  test('должен закрыть модальное окно по клику на оверлей', async ({
+    page
+  }) => {
+    // Открываем модалку через пользовательский сценарий
+    await page.getByText(ingredientName).first().click();
 
-    // Открываем модальное окно
-    await page.goto(`http://localhost:3000/ingredients/${ingredientId}`, {
-      waitUntil: 'networkidle'
+    const modalTitle = page.getByRole('heading', {
+      name: 'Детали ингредиента'
     });
 
-    // Проверяем, что модальное окно открыто
-    await expect(page.getByRole('heading', { name: 'Детали ингредиента' })).toBeVisible();
+    await expect(modalTitle).toBeVisible();
 
-    // Кликаем на оверлей (фон модального окна)
-    // Оверлей покрывает всю страницу, кликаем в левый верхний угол
+    // Кликаем по оверлею
     await page.mouse.click(1, 1);
 
-    // Проверяем, что модальное окно закрылось
-    await expect(page.getByRole('heading', { name: 'Детали ингредиента' })).not.toBeVisible();
+    // Проверяем закрытие модалки
+    await expect(modalTitle).not.toBeVisible();
+
+    // Проверяем возврат на главную страницу
     await expect(page).toHaveURL('http://localhost:3000/');
   });
 });

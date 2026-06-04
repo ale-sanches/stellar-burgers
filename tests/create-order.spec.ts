@@ -13,11 +13,14 @@ test.describe('Создание заказа', () => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: ingredients })
+        body: JSON.stringify({
+          success: true,
+          data: ingredients
+        })
       });
     });
 
-    // Перехватываем запрос данных пользователя
+    // Перехватываем запрос пользователя
     await page.route('**/api/auth/user', async (route) => {
       await route.fulfill({
         status: 200,
@@ -26,10 +29,9 @@ test.describe('Создание заказа', () => {
       });
     });
 
-    // Перехватываем запрос создания заказа
+    // Перехватываем создание заказа
     await page.route('**/api/orders', async (route) => {
-      const request = route.request();
-      if (request.method() === 'POST') {
+      if (route.request().method() === 'POST') {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
@@ -38,45 +40,69 @@ test.describe('Создание заказа', () => {
       }
     });
 
-    // Устанавливаем моковые токены в cookie и localStorage
-    await page.addInitScript((tokens) => {
-      // Устанавливаем accessToken в cookie
-      document.cookie = `accessToken=${tokens.accessToken}; path=/`;
-      // Устанавливаем refreshToken в localStorage
-      localStorage.setItem('refreshToken', tokens.refreshToken);
-    }, { accessToken: MOCK_ACCESS_TOKEN, refreshToken: MOCK_REFRESH_TOKEN });
+    // Устанавливаем токены до загрузки приложения
+    await page.addInitScript(
+      ({ accessToken, refreshToken }) => {
+        document.cookie = `accessToken=${accessToken}; path=/`;
+        localStorage.setItem('refreshToken', refreshToken);
+      },
+      {
+        accessToken: MOCK_ACCESS_TOKEN,
+        refreshToken: MOCK_REFRESH_TOKEN
+      }
+    );
 
     await page.goto('http://localhost:3000');
   });
 
-  test.afterEach(async ({ page }) => {
-    // Очищаем токены после завершения теста
-    await page.addInitScript(() => {
-      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      localStorage.removeItem('refreshToken');
+  test.afterEach(async ({ page, context }) => {
+    await context.clearCookies();
+
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
     });
   });
 
   test('должен создать заказ с ингредиентами', async ({ page }) => {
     // Добавляем булку
-    await page.getByRole('button', { name: /Добавить/i }).first().click();
+    await page
+      .getByRole('button', { name: /Добавить/i })
+      .first()
+      .click();
 
-    // Ожидаем появления булки в конструкторе
-    await expect(page.getByTestId('constructor-bun-top')).toBeVisible();
+    // Проверяем, что булка появилась в конструкторе
+    await expect(
+      page.getByTestId('constructor-bun-top')
+    ).toBeVisible();
 
-    // Нажимаем кнопку "Оформить заказ"
-    await page.getByRole('button', { name: /Оформить заказ/i }).click();
+    // Оформляем заказ
+    await page
+      .getByRole('button', { name: /Оформить заказ/i })
+      .click();
 
-    // Проверяем, что модальное окно открылось и номер заказа верный
-    await expect(page.getByText(order.order.number.toString())).toBeVisible({ timeout: 10000 });
+    // Находим модальное окно заказа
+    const orderModal = page.getByRole('dialog');
 
-    // Закрываем модальное окно нажатием Escape
+    // Проверяем открытие модалки
+    await expect(orderModal).toBeVisible({
+      timeout: 10000
+    });
+
+    // Проверяем номер заказа внутри модалки
+    await expect(orderModal).toContainText(
+      order.order.number.toString()
+    );
+
+    // Закрываем модалку
     await page.keyboard.press('Escape');
 
-    // Проверяем, что модальное окно закрылось
-    await expect(page.getByText(order.order.number.toString())).not.toBeVisible();
+    // Проверяем закрытие модалки
+    await expect(orderModal).not.toBeVisible();
 
-    // Проверяем, что конструктор пуст (нет булки)
-    await expect(page.getByTestId('constructor-bun-top')).toContainText('Выберите булки');
+    // Проверяем очистку конструктора после оформления заказа
+    await expect(
+      page.getByTestId('constructor-bun-top')
+    ).toContainText('Выберите булки');
   });
 });
