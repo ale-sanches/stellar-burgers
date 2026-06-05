@@ -19,8 +19,7 @@ const mockBun: TIngredient = {
   price: 100,
   image: 'test.png',
   image_mobile: 'test-mobile.png',
-  image_large: 'test-large.png',
-  __v: 0
+  image_large: 'test-large.png'
 };
 
 const mockIngredient: TIngredient = {
@@ -34,18 +33,22 @@ const mockIngredient: TIngredient = {
   price: 200,
   image: 'test.png',
   image_mobile: 'test-mobile.png',
-  image_large: 'test-large.png',
-  __v: 0
+  image_large: 'test-large.png'
 };
 
 describe(' редьюсер burgerConstructor', () => {
   it('должен возвращать начальное состояние', () => {
-    expect(constructorReducer(undefined, { type: 'unknown' })).toEqual(initialState);
+    expect(constructorReducer(undefined, { type: 'unknown' })).toEqual(
+      initialState
+    );
   });
 
   describe('обработка экшена добавления ингредиента', () => {
     it('должен добавлять ингредиент в пустой конструктор', () => {
-      const result = constructorReducer(initialState, addIngredient(mockIngredient));
+      const result = constructorReducer(
+        initialState,
+        addIngredient(mockIngredient)
+      );
 
       expect(result.ingredients).toHaveLength(1);
       expect(result.ingredients[0]._id).toBe(mockIngredient._id);
@@ -61,7 +64,11 @@ describe(' редьюсер burgerConstructor', () => {
       );
       const result2 = constructorReducer(
         result,
-        addIngredient({ ...mockIngredient, _id: 'ingredient-2', name: 'Тестовый ингредиент 2' })
+        addIngredient({
+          ...mockIngredient,
+          _id: 'ingredient-2',
+          name: 'Тестовый ингредиент 2'
+        })
       );
 
       expect(result2.ingredients).toHaveLength(2);
@@ -171,7 +178,10 @@ describe(' редьюсер burgerConstructor', () => {
         ingredients: [{ ...mockIngredient, id: 'unique-id-1' }]
       };
 
-      const result = constructorReducer(stateWithIngredients, clearConstructor());
+      const result = constructorReducer(
+        stateWithIngredients,
+        clearConstructor()
+      );
 
       expect(result.bun).toBeNull();
       expect(result.ingredients).toHaveLength(0);

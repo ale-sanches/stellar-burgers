@@ -27,8 +27,7 @@ const mockIngredients: TIngredient[] = [
     price: 100,
     image: 'test.png',
     image_mobile: 'test-mobile.png',
-    image_large: 'test-large.png',
-    __v: 0
+    image_large: 'test-large.png'
   },
   {
     _id: '2',
@@ -41,8 +40,7 @@ const mockIngredients: TIngredient[] = [
     price: 200,
     image: 'test.png',
     image_mobile: 'test-mobile.png',
-    image_large: 'test-large.png',
-    __v: 0
+    image_large: 'test-large.png'
   }
 ];
 
