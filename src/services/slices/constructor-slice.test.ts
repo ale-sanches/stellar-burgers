@@ -5,7 +5,7 @@ import constructorReducer, {
   moveIngredient,
   clearConstructor,
   initialState
-} from '../src/services/slices/constructor-slice';
+} from './constructor-slice';
 import { TIngredient } from '@utils-types';
 
 const mockBun: TIngredient = {

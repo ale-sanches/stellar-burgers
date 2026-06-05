@@ -1,6 +1,6 @@
 import ingredientsReducer, {
   getIngredients
-} from '../src/services/slices/ingredients-slice';
+} from './ingredients-slice';
 import { TIngredient } from '@utils-types';
 
 interface IngredientsState {
